@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Your Profile</h1>
+        <div id="profile-details"></div>
+        <button id="logout">Logout</button>
+    </div>
+    <script>
+        async function fetchProfile() {
+            const response = await fetch('/profile');
+            const user = await response.json();
+            const details = document.getElementById('profile-details');
+            details.innerHTML = `<p>Name: ${user.name}</p><p>Email: ${user.email}</p>`;
+        }
+
+        document.getElementById('logout').addEventListener('click', () => {
+            window.location.href = '/index.html';
+        });
+
+        fetchProfile();
+    </script>
+</body>
+</html>

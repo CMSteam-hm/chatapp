@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Settings</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Settings</h1>
+        <form id="settings-form">
+            <label for="notifications">Enable Notifications:</label>
+            <input type="checkbox" id="notifications">
+            <button type="submit">Save</button>
+        </form>
+    </div>
+    <script>
+        const settingsForm = document.getElementById('settings-form');
+        settingsForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const notifications = document.getElementById('notifications').checked;
+            alert(`Settings saved: Notifications ${notifications ? 'enabled' : 'disabled'}`);
+        });
+    </script>
+</body>
+</html>

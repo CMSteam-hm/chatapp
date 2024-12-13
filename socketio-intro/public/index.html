@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Chat</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Real-Time Chat App</h1>
+        <a href="profile.html">Profile</a>
+        <a href="settings.html">Settings</a>
+        <a href="signup.html">Log Out</a>
+    </div>
+    <div class="form-container">
+        <form id="room-form">
+            <input id="room-input" placeholder="Enter room name" autocomplete="off" />
+            <button type="submit">Join-Room</button>
+        </form>
+        <br>
+        <form>
+            <input id="room-input" placeholder="Enter room name" autocomplete="off" />
+            <button id="leave-room">Leave Room</button>
+        </form>
+    </div>
+    <div id="chat-rooms-container">
+        <h2>Active Rooms</h2>
+        <ul id="rooms-list"></ul>
+    </div>
+    <div id="chat-container">
+        <h2>Room: <span id="current-room">None</span></h2>
+        <ul id="messages"></ul>
+        <form id="message-form">
+            <input id="message-input" placeholder="Type a message" autocomplete="off" />
+            <button type="submit">Send</button>
+        </form>
+    </div>
+    <script>
+        const socket = io();
+
+        const roomForm = document.getElementById('room-form');
+        const roomInput = document.getElementById('room-input');
+        const leaveRoomButton = document.getElementById('leave-room');
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+        const messages = document.getElementById('messages');
+        const roomsList = document.getElementById('rooms-list');
+        const currentRoomDisplay = document.getElementById('current-room');
+
+        let currentRoom = '';
+
+        // Join a room
+        roomForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (roomInput.value) {
+                currentRoom = roomInput.value;
+                socket.emit('join room', currentRoom);
+                currentRoomDisplay.textContent = currentRoom;
+                roomInput.value = '';
+                messages.innerHTML = ''; // Clear messages for new room
+            }
+        });
+
+        // Leave a room
+        leaveRoomButton.addEventListener('click', () => {
+            if (currentRoom) {
+                socket.emit('leave room', currentRoom);
+                currentRoom = '';
+                currentRoomDisplay.textContent = 'None';
+                messages.innerHTML = ''; // Clear chat messages
+            }
+        });
+
+        // Send a chat message
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (messageInput.value && currentRoom) {
+                socket.emit('chat message', { room: currentRoom, message: messageInput.value });
+                messageInput.value = '';
+            }
+        });
+         // Receive and display messages
+         socket.on('chat message', (msg) => {
+            const item = document.createElement('li');
+            item.textContent = `${msg.sender}: ${msg.text}`;
+            messages.appendChild(item);
+            messages.scrollTop = messages.scrollHeight;
+        });
+
+        // System notifications
+        socket.on('system message', (msg) => {
+            const item = document.createElement('li');
+            item.style.color = 'gray';
+            item.textContent = `[System]: ${msg}`;
+            messages.appendChild(item);
+            messages.scrollTop = messages.scrollHeight;
+        });
+
+
+        // Update rooms list
+        socket.on('update rooms', (rooms) => {
+            roomsList.innerHTML = '';
+            rooms.forEach((room) => {
+                const item = document.createElement('li');
+                item.textContent = room;
+                roomsList.appendChild(item);
+            });
+        });
+
+        // System notifications
+        socket.on('system message', (msg) => {
+            const item = document.createElement('li');
+            item.style.color = 'gray';
+            item.textContent = `[System]: ${msg}`;
+            messages.appendChild(item);
+            messages.scrollTop = messages.scrollHeight;
+        });
+    </script>
+</body>
+</html>
